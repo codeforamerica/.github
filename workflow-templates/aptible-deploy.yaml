@@ -39,7 +39,7 @@ jobs:
   draft-release:
     name: Draft a new release
     needs: deploy
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }} && ${{ $CREATE_TAG == 'TRUE' }}
     runs-on: ubuntu-latest
     steps:
       - name: Create tag name
@@ -61,7 +61,7 @@ jobs:
   merge_to_staging:
     name: Merge main -> staging
     needs: deploy
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }} && {{ $MERGE_MAIN_TO_STAGING == 'TRUE' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

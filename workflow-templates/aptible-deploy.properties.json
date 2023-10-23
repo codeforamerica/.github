@@ -1,0 +1,5 @@
+{
+  "name": "Aptible deploy",
+  "description": "Deployment script for project in Aptible",
+  "iconName": "octicon rocket"
+}
