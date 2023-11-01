@@ -1,0 +1,46 @@
+name: Deploy to aptible
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      deploy-handle:
+        required: true
+        type: string
+      app-name:
+        required: true
+        type: string
+    secrets:
+      aptible_env_vars:
+        required: true
+      aptible_remote_url:
+        required: true
+      aptible_ssh_private_key:
+        required: true
+      aptible_known_hosts:
+        required: true
+      aptible_username:
+        required: true
+      aptible_password:
+        required: true
+jobs:
+  deploy:
+    name: Deploy to Aptible ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2.6.1
+        with:
+          key: ${{ secrets.aptible_ssh_private_key }}
+          known_hosts: ${{ secrets.aptible_known_hosts }}
+      - name: Push to Aptible remote branch
+        run: git push --force $APTIBLE_REMOTE_URL "${GITHUB_SHA}:${{ inputs.deploy-handle }}"
+      - name: Set Aptible environment variables and deploy
+        run: |
+          wget -O aptible-package https://omnibus-aptible-toolbelt.s3.amazonaws.com/aptible/omnibus-aptible-toolbelt/master/206/pkg/aptible-toolbelt_0.16.5%2B20200508143656~ubuntu.16.04-1_amd64.deb
+          sudo dpkg -i aptible-package
+          aptible login --email=${{ secrets.aptible_username }} --password=${{ secrets.aptible_password }}
+          aptible deploy --app ${{ inputs.app-name }} --git-commitish ${GITHUB_SHA} \
+          ${{ secrets.aptible_env_vars }}

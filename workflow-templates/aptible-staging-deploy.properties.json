@@ -1,0 +1,5 @@
+{
+  "name": "Deploy to Aptible Staging",
+  "description": "Deployment action for project hosted in Aptible. Includes release tag creation and merging main branch into staging.",
+  "iconName": "octicon rocket"
+}
