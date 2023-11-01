@@ -1,0 +1,63 @@
+name: Run any gradle task
+
+on:
+  workflow_call:
+    inputs:
+      gradle-task-command:
+        required: true
+        type: string
+      gradle-task-name:
+        required: true
+        type: string
+    secrets:
+      postgres_user:
+        required: true
+      postgres_password:
+        required: true
+      postgres_db:
+        required: true
+jobs:
+  execute-task:
+    name: ${{ inputs.gradle-task-name }}
+    permissions:
+      actions: read
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: ${{ secrets.postgres_user }}
+          POSTGRES_DB: ${{ secrets.postgres_db }}
+          POSTGRES_PASSWORD: ${{ secrets.postgres_password }}
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up ChromeDriver
+        uses: nanasess/setup-chromedriver@v2.2.0
+        with:
+          chromedriver-version: '115.0.5790.102'
+      - name: Set up JDK
+        uses: actions/setup-java@v3.13.0
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+          cache: 'gradle'
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Run gradle task
+        run: ${{ inputs.gradle-task-command }}
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Cleanup Gradle Cache
+        run: |
+          rm -f ~/.gradle/caches/modules-2/modules-2.lock
+          rm -f ~/.gradle/caches/modules-2/gc.properties

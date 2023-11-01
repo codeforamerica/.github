@@ -1,0 +1,31 @@
+name: Run gradle unit and accessibility tests
+
+on:
+  push:
+    branches: [ main, staging ]
+  pull_request:
+
+env:
+  POSTGRES_USER: ${{ secrets.TEST_POSTGRES_USER }}
+  POSTGRES_DB: ${{ secrets.TEST_POSTGRES_DB }}
+  POSTGRES_PASSWORD: ${{ secrets.TEST_POSTGRES_PASSWORD }}
+
+jobs:
+  execute-gradle-unit-tests:
+    uses: codeforamerica/.github/reusable-workflows/run-gradle-task.yaml@main
+    with:
+      gradle-task-command: ./gradlew clean test --stacktrace
+      gradle-task-name: Run unit tests
+    secrets:
+      postgres_user: ${{ secrets.TEST_POSTGRES_USER }}
+      postgres_db: ${{ secrets.TEST_POSTGRES_DB }}
+      postgres_password: ${{ secrets.TEST_POSTGRES_PASSWORD }}
+  execute-gradle-accessibility-tests:
+    uses: codeforamerica/.github/reusable-workflows/run-gradle-task.yaml@main
+    with:
+      gradle-task-command: ./gradlew accessibilityTest
+      gradle-task-name: Run accessibility tests
+    secrets:
+      postgres_user: ${{ secrets.TEST_POSTGRES_USER }}
+      postgres_db: ${{ secrets.TEST_POSTGRES_DB }}
+      postgres_password: ${{ secrets.TEST_POSTGRES_PASSWORD }}
