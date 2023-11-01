@@ -1,0 +1,5 @@
+{
+  "name": "Run gradle unit + accessibility tests",
+  "description": "Action to run gradle unit and accessibility tasks for a Java Spring project using gradle.",
+  "iconName": "octicon tasklist"
+}
